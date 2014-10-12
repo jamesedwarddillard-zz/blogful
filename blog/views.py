@@ -62,3 +62,17 @@ def add_post_post():
 	session.commit()
 	return redirect(url_for("posts"))
 
+@app.route("/post/<int:post_id>/edit", methods = ["GET"])
+def edit_post_get(post_id):
+	#Zero indexed posts
+	post_index = post_id - 1
+
+	posts = session.query(Post)
+	count = session.query(Post).count()
+
+	if post_id < 1 or post_id > count:
+		return render_template("not_found.html")
+	else: 
+		selected_post = posts[post_index]
+		return render_template("edit_post.html", post = selected_post,)
+
