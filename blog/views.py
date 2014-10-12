@@ -34,10 +34,17 @@ def posts(page=1, paginate_by=10):
 
 @app.route("/post/<post_id>")
 def view_post(post_id):
+	#Zero indexed posts
 	post_index = int(post_id) - 1
+
 	posts = session.query(Post)
-	selected_post = posts[post_index]
-	return render_template("post_view.html", post = selected_post,)
+	count = session.query(Post).count()
+
+	if int(post_id) < 1 or int(post_id) > count:
+		return render_template("not_found.html")
+	else: 
+		selected_post = posts[post_index]
+		return render_template("post_view.html", post = selected_post,)
 
 
 @app.route("/post/add", methods=["GET"])
