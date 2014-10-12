@@ -76,3 +76,13 @@ def edit_post_get(post_id):
 		selected_post = posts[post_index]
 		return render_template("edit_post.html", post = selected_post,)
 
+@app.route("/post/<int:post_id>/edit", methods = ["POST"])
+def edit_post_post(post_id):
+	post_index = post_id - 1
+	post = session.query(Post).filter_by(id = post_id).first()
+	post.title = request.form["title"]
+	post.content = mistune.markdown(request.form["content"])
+	session.commit()
+	return redirect(url_for("posts"))
+
+
