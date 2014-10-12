@@ -32,6 +32,14 @@ def posts(page=1, paginate_by=10):
 		total_pages=total_pages
 	)
 
+@app.route("/post/<post_id>")
+def view_post(post_id):
+	post_index = int(post_id) - 1
+	posts = session.query(Post)
+	selected_post = posts[post_index]
+	return render_template("post_view.html", post = selected_post,)
+
+
 @app.route("/post/add", methods=["GET"])
 def add_post_get():
 	return render_template("add_post.html")
