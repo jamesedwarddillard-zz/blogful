@@ -4,6 +4,11 @@
 
 {{ macros.render_post(post) }}
 
+<ul class = "pager">
+	<li class = "previous">
+	<a href = "{{ url_for('edit_post_get', post_id = post.id) }}">Edit</a>
+	</li>
+</ul>
 
 
 {% endblock %}
