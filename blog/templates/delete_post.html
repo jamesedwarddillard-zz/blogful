@@ -1,0 +1,18 @@
+{% import "macros.html" as macros %}
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<h1>
+	Delete Post
+</h1>
+
+{{ macros.render_post(post) }}
+
+<form role="form" method="POST">
+	<button type="submit" class="btn btn-default">Confirm post deletion</button>
+	<p>This cannot be undone.</p>
+</form>
+
+{% endblock %}

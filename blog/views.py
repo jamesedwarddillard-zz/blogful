@@ -78,7 +78,6 @@ def edit_post_get(post_id):
 
 @app.route("/post/<int:post_id>/edit", methods = ["POST"])
 def edit_post_post(post_id):
-	post_index = post_id - 1
 	post = session.query(Post).filter_by(id = post_id).first()
 	post.title = request.form["title"]
 	post.content = mistune.markdown(request.form["content"])
@@ -86,5 +85,16 @@ def edit_post_post(post_id):
 	return redirect(url_for("posts"))
 
 
+@app.route("/post/<int:post_id>/delete", methods = ["GET"])
+def delete_post_get(post_id):
+	post = session.query(Post).filter_by(id = post_id).first()
+	return render_template("delete_post.html", post = post)
+
+@app.route("/post/<int:post_id>/delete", methods = ["POST"])
+def delete_post_post(post_id):
+	post = session.query(Post).filter_by(id = post_id).first()
+	session.delete(post)
+	session.commit()
+	return redirect(url_for("posts"))
 
 
