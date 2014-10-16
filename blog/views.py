@@ -1,6 +1,6 @@
 import mistune
 from flask import render_template, request, redirect, url_for, flash
-from flask.ext.login import login_user
+from flask.ext.login import login_user, login_required
 from werkzeug.security import check_password_hash
 
 from blog import app
@@ -36,16 +36,13 @@ def posts(page=1, paginate_by=10):
 
 @app.route("/post/<int:post_id>")
 def view_post(post_id):
-	#Zero indexed posts
-	post_index = post_id - 1
-
 	posts = session.query(Post)
 	count = session.query(Post).count()
 
 	if post_id < 1 or post_id > count:
 		return render_template("not_found.html")
 	else: 
-		selected_post = posts[post_index]
+		selected_post = posts.filter_by(id = post_id).first()
 		return render_template("post_view.html", post = selected_post,)
 
 
@@ -78,7 +75,7 @@ def edit_post_get(post_id):
 	if post_id < 1 or post_id > count:
 		return render_template("not_found.html")
 	else: 
-		selected_post = posts[post_index]
+		selected_post = posts.filter_by(id = post_id).first()
 		return render_template("edit_post.html", post = selected_post,)
 
 @app.route("/post/<int:post_id>/edit", methods = ["POST"])
@@ -113,7 +110,7 @@ def login_get():
 def login_post():
 		email = request.form["email"]
 		password = request.form["password"]
-		user = session.query(User).filter(email=email).first()
+		user = session.query(User).filter_by(email=email).first()
 		if not user or not check_password_hash(user.password, password):
 			flash("Incorrect username or password", "danger")
 			return redirect(url_for("login_get"))

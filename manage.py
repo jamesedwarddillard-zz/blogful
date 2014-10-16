@@ -10,13 +10,17 @@ from werkzeug.security import generate_password_hash
 
 from blog.models import User
 
+from flask.ext.migrate import Migrate, MigrateCommand
+from blog.database import Base
+
+
 manager = Manager(app)
 
 @manager.command
 def adduser():
 	name = raw_input("Name: ")
 	email = raw_input("Email: ")
-	if session.query(User).filter_by(email = email).first() == email:
+	if session.query(User).filter_by(email = email).count() > 0:
 		print "User with that email already exists."
 		return
 
