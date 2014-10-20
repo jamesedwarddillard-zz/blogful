@@ -1,6 +1,6 @@
 import mistune
 from flask import render_template, request, redirect, url_for, flash
-from flask.ext.login import login_user, login_required, current_user
+from flask.ext.login import login_user, login_required, current_user, logout_user
 from werkzeug.security import check_password_hash
 
 from blog import app
@@ -144,3 +144,9 @@ def dashboard(page = 1, paginate_by = 20):
 		has_prev=has_prev,
 		page=page,
 		total_pages=total_pages)
+
+@app.route("/logout")
+@login_required
+def logout():
+	logout_user()
+	return redirect(url_for('posts'))
