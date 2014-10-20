@@ -1,0 +1,11 @@
+{% macro render_post_title(post) %}
+<div class="row">
+	<div class="text">
+		<ul class="listed-unstyled">
+			<li>
+				{{ post.datetime | dateformat("%m.%d.%y") }} <a/ href = "{{ url_for('view_post', post_id = post.id) }}" >{{ post.title }}</a>
+			</li>
+		</ul>
+	</div>
+</div>
+{% endmacro %}

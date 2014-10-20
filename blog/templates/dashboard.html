@@ -1,0 +1,36 @@
+{% import "post_title_macro.html" as post_title_macro %}
+{% extends "base.html" %}
+{% block content %}
+
+<h1>
+	Dashboard
+</h1>
+
+<h3>
+Welcome, {{ user.name }}
+</h3>
+
+<div class = "col-mid-10">
+	<a href="{{ url_for('add_post_get') }}"> Make a new post </a>
+	
+</div>
+<p>You've written {{ user_posts }} posts</p>
+
+{% for post in posts %}
+{{ post_title_macro.render_post_title(post) }}
+{% endfor %}
+
+<ul class="pager">
+	{% if has_next %}
+	<li class="previous" >
+	<a href="{{ url_for('posts', page=page + 1) }}">&larr; Older</a>
+	</li>
+	{% endif %}
+	{% if has_prev %}
+	<li class="next">
+	<a href="{{ url_for('posts', page=page - 1) }}">&rarr; Newer</a>
+	</li>
+	{% endif %}
+</ul>
+
+{% endblock %}

@@ -116,4 +116,31 @@ def login_post():
 			flash("Incorrect username or password", "danger")
 			return redirect(url_for("login_get"))
 		login_user(user)
-		return redirect(request.args.get('next') or url_for('posts'))
+		return redirect(request.args.get('next') or url_for('dashboard'))
+
+@app.route("/dashboard")
+@app.route("/dashboard/page/<int:page>")
+@login_required
+def dashboard(page = 1, paginate_by = 20):
+	user = current_user
+	user_posts = session.query(Post).filter_by(author_id = user.id).count()
+	page_index = page - 1
+
+	start = page_index * paginate_by
+	end = start + paginate_by
+
+	total_pages = (user_posts - 1) / paginate_by + 1
+	has_next = page_index < total_pages - 1
+	has_prev = page_index > 0
+
+	posts = session.query(Post).filter_by(author_id = user.id)
+	posts = posts.order_by(Post.datetime.desc())
+	posts = posts[start:end]
+	return render_template('dashboard.html', 
+		user = user, 
+		user_posts = user_posts,
+		posts=posts, 
+		has_next=has_next,
+		has_prev=has_prev,
+		page=page,
+		total_pages=total_pages)
