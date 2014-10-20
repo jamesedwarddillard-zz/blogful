@@ -67,9 +67,6 @@ def add_post_post():
 @app.route("/post/<int:post_id>/edit", methods = ["GET"])
 @login_required
 def edit_post_get(post_id):
-	#Zero indexed posts
-	post_index = post_id - 1
-
 	posts = session.query(Post)
 	count = session.query(Post).count()
 
@@ -77,7 +74,11 @@ def edit_post_get(post_id):
 		return render_template("not_found.html")
 	else: 
 		selected_post = posts.filter_by(id = post_id).first()
-		return render_template("edit_post.html", post = selected_post,)
+		if selected_post.author_id != current_user.id:
+			flash("Sorry, you do not have permission to edit that post", "danger")
+			return redirect(url_for('dashboard'))
+		else:
+			return render_template("edit_post.html", post = selected_post,)
 
 @app.route("/post/<int:post_id>/edit", methods = ["POST"])
 @login_required
