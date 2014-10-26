@@ -33,13 +33,17 @@ class TestViews(unittest.TestCase):
 		#Remove the tables and all their data from the test database
 		Base.metadata.drop_all(engine)
 
-	def simulate_login(self):
+	def simulate_login(self, user):
 		with self.client.session_transaction() as http_session:
-			http_session["user_id"] = str(self.user_a.id)
+			http_session["user_id"] = str(user.id)
 			http_session["_fresh"] = True
 
+	def simulate_logout(self, user):
+		with self.client.session_transaction() as http_session:
+			http_session["user_id"] = str(user.id)
+			http_session["_fresh"] = False
+
 	def add_test_post(self):
-		self.simulate_login()
 		response = self.client.post("/post/add", data={
 			"title": "Test Post",
 			"content": "Test content"
@@ -47,7 +51,7 @@ class TestViews(unittest.TestCase):
 		return response
 
 	def testAddPost(self):
-		self.simulate_login()
+		self.simulate_login(self.user_a)
 		response = self.add_test_post()
 
 		self.assertEqual(response.status_code, 302)
@@ -61,15 +65,45 @@ class TestViews(unittest.TestCase):
 		self.assertEqual(post.author, self.user_a)
 
 	def testDeletePost(self):
-		self.simulate_login()
+		self.simulate_login(self.user_a)
 		add_response = self.add_test_post()
 		post = session.query(Post).first()
-		delete_response = self.client.post("/post/{}/delete".format(post.id), data={"post_id": "{}".format(post.id)})
+		delete_response = self.client.post("/post/{}/delete".format(post.id))
 		count = len(session.query(Post).all())
 
 		self.assertEqual(delete_response.status_code, 302)
 		self.assertEqual(count, 0)
 		self.assertEqual(session.query(Post).filter_by(id=post.id).first(), None)
+
+	def testEditPost(self):
+		#Logging in as Alice and creating a test post
+		self.simulate_login(self.user_a)
+		add_response = self.add_test_post()
+		post = session.query(Post).filter_by(author_id = self.user_a.id).first()
+
+		#editing the content as Alice
+		alice_edit_response = self.client.post("/post/{}/edit".format(post.id), data={
+			"title": "Alice's updated title",
+			"content": "Alice's updated content"
+			})
+
+		#Logging out as Alice and logigng in as Eddie
+		self.simulate_logout(self.user_a)
+		self.simulate_login(self.user_b)
+
+		#Attempting to edit Alice's post as Eddie	
+		eddie_edit_response = self.client.post("/post/{}/edit".format(post.id), data={
+			"title": "Eddie's title",
+			"content": "Eddie's content"
+			})
+
+		new_post = session.query(Post).first()
+
+		self.assertEqual(new_post.title, "Alice's updated title")
+		self.assertEqual(new_post.content, "<p>Alice's updated content</p>\n")
+		self.assertEqual(new_post.author, self.user_a)
+		self.assertEqual(alice_edit_response.status_code, 302)
+		self.assertEqual(eddie_edit_response.status_code, 302)
 
 
 if __name__ == "__main__":

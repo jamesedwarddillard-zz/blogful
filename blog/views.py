@@ -83,11 +83,17 @@ def edit_post_get(post_id):
 @app.route("/post/<int:post_id>/edit", methods = ["POST"])
 @login_required
 def edit_post_post(post_id):
-	post = session.query(Post).filter_by(id = post_id).first()
-	post.title = request.form["title"]
-	post.content = mistune.markdown(request.form["content"])
-	session.commit()
-	return redirect(url_for("posts"))
+	selected_post = session.query(Post).filter_by(id=post_id).first()
+
+	if selected_post.author_id != current_user.id:
+		flash("Sorry, you do not have permission to edit this post", "danger")
+		return redirect(url_for("dashboard"))
+	else: 
+		post = session.query(Post).filter_by(id = post_id).first()
+		post.title = request.form["title"]
+		post.content = mistune.markdown(request.form["content"])
+		session.commit()
+		return redirect(url_for("posts"))
 
 
 @app.route("/post/<int:post_id>/delete", methods = ["GET"])
