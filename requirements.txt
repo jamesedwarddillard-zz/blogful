@@ -11,3 +11,5 @@ Werkzeug==0.9.6
 alembic==0.6.7
 itsdangerous==0.24
 mistune==0.4
+selenium==2.44.0
+splinter==0.6.0
